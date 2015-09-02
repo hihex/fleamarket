@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="some_color_444">#abc</color>
+    <color name="some_color_888">#1256ab</color>
+    <color name="some_color_4444">#9876</color>
+    <color name="some_color_8888">#aab61004</color>
+    <dimen name="some_dimen_sp">14sp</dimen>
+    <dimen name="some_dimen_dp">15.6dp</dimen>
+    <dimen name="some_dimen_px">55px</dimen>
+    <dimen name="some_dimen_in">2.54in</dimen>
+    <dimen name="some_dimen_mm">3.1415926535897932384626433832795028841971693993751058209749445923078164mm</dimen>
+</resources>

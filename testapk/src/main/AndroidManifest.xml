@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.testapk"
+          xmlns:tools="http://schemas.android.com/tools"
+          tools:ignore="allowBackup">
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+        <activity android:name=".FirstActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".SecondActivity"/>
+        <meta-data android:name="SOME_META_DATA" android:value="asdfghjkl"/>
+        <meta-data android:name="MORE_META_DATA" android:value="12345"/>
+        <meta-data android:name="MY_CHANNEL" android:value="customized"/>
+        <meta-data android:name="MY_CHANNEL_DONT_REPLACE" android:value="keep-it"/>
+    </application>
+</manifest>
+

@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.3.0'
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
+
+    signingConfigs {
+        release {
+            storeFile file('keystore')
+            storePassword 'aaaaaa'
+            keyAlias 'mykey'
+            keyPassword 'aaaaaa'
+        }
+    }
+
+    defaultConfig {
+        applicationId 'com.example.testapk'
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionName '1.0'
+        versionCode 1
+        signingConfig signingConfigs.release
+    }
+
+    flavorDimensions 'first', 'second'
+
+    productFlavors {
+        standard {
+            dimension 'first'
+        }
+        anotherFlavor {
+            dimension 'first'
+        }
+        foo {
+            dimension 'second'
+        }
+        bar {
+            dimension 'second'
+        }
+    }
+}
+
+dependencies {
+    // Test resource merging. The resulting manifest should contain INTERNET and GET_TASKS permissions, and a
+    // `ic_notification_android_labs_logo.png` drawable.
+    compile 'co.infinum:NotificationLib:1.1.2@aar'
+}

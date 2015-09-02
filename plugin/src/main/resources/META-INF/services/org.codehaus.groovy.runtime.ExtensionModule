@@ -1,0 +1,3 @@
+moduleName=FleaMarket
+moduleVersion=0.1
+extensionClasses=hihex.fleamarket.ExtensionModule

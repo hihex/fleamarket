@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://www.example.com/"
+      android:layout_width="12px"
+      app:foo="bar">
+    <![CDATA[
+        Here is some <b>CDATA</b> inside an XML.
+    ]]>
+    <!-- comment, should be ignored? -->
+    <b value="35dp">40mm</b>
+    <c value="1/2" app:value2="25%"/>
+    <app:tag>24.680</app:tag>
+    <d><d><d><d>@drawable/ic_launcher</d></d></d></d>
+    &#x22222;
+</test>

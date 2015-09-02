@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Test</string>
+    <string name="formatted_string">&amp;\n ABC <b>Bold</b> and <i>Italic <u><b>with</b> underscore</u></i></string>
+    <plurals name="plural_string">
+        <item quantity="one">Foot</item>
+        <item quantity="other">Feet</item>
+    </plurals>
+</resources>
