@@ -1,9 +1,9 @@
 package hihex.fleamarket.utils
-
+import groovy.transform.CompileStatic
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logger
 
-
+@CompileStatic
 class LoggerAppendable implements Appendable {
     private StringBuilder line
     private final Logger logger

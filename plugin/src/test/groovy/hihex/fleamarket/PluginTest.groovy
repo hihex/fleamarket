@@ -266,4 +266,27 @@ class PluginTest extends IntegrationSpec {
         then:
         aaptResult =~ /A: android:name\([^)]+\)="MY_CHANNEL" \([^)]+\)\s*A: android:value\([^)]+\)="123abc"/
     }
+
+    def 'interaction with productFlavors'() {
+        buildFile << '''
+                productFlavors {
+                    first
+                    second
+                }
+            }
+
+            channels {
+                defaultConfig {
+                    flavors 'first'
+                }
+                create 'alt'
+            }
+        '''
+
+        when:
+        runTasksSuccessfully('assembleAlt')
+
+        then:
+        fileExists('build/outputs/flea-market/alt.apk')
+    }
 }

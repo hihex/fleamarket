@@ -53,7 +53,7 @@ class Channel {
     }
 
     String getPackageTaskName() {
-        'package' + flavors.each { String s -> s.capitalize() }.join('') + buildType.capitalize()
+        'package' + flavors.collect { String s -> s.capitalize() }.join('') + buildType.capitalize()
     }
 
     String getIntermediateDirName() {
