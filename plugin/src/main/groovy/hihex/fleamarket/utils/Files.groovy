@@ -1,5 +1,7 @@
 package hihex.fleamarket.utils
 
+import org.apache.commons.io.FileUtils
+
 import java.nio.file.Files as NioFiles
 
 class Files {
@@ -11,11 +13,15 @@ class Files {
         try {
             NioFiles.createSymbolicLink(targetPath, sourcePath)
         } catch (UnsupportedOperationException ignored) {
-            NioFiles.copy(sourcePath, targetPath)
+            copy(source, target)
         }
     }
 
     static void copy(final File source, final File target) {
-        NioFiles.copy(source.toPath(), target.toPath())
+        if (source.isDirectory()) {
+            FileUtils.copyDirectory(source, target)
+        } else {
+            NioFiles.copy(source.toPath(), target.toPath())
+        }
     }
 }

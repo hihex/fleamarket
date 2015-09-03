@@ -70,19 +70,25 @@ class ResValue {
      *                    replaceAll(Pattern, Closure)}).
      */
     void replaceStrings(final Pattern pattern, final Object replacement) {
-        if (type in ['string', 'string-array', 'plurals']) {
-            DOMCategory.xpath(element, '//text()', XPathConstants.NODESET).each { Text node ->
-                def src = node.data
-                def res
-                if (replacement instanceof CharSequence) {
-                    res = src.replaceAll(pattern, replacement)
-                } else if (replacement instanceof Closure) {
-                    res = src.replaceAll(pattern, replacement)
-                } else {
-                    throw new InvalidUserCodeException("replacement in ResValue.replaceStrings() must either be a String or a Closure")
+        switch (type) {
+            case 'string':
+            case 'string-array':
+            case 'plurals':
+                DOMCategory.xpath(element, './/text()', XPathConstants.NODESET).each { Text node ->
+                    def src = node.data
+                    def res
+                    if (replacement instanceof CharSequence) {
+                        res = src.replaceAll(pattern, replacement)
+                    } else if (replacement instanceof Closure) {
+                        res = src.replaceAll(pattern, replacement)
+                    } else {
+                        throw new InvalidUserCodeException("replacement in ResValue.replaceStrings() must either be a String or a Closure")
+                    }
+                    node.data = res
                 }
-                node.data = res
-            }
+                break
+            default:
+                break
         }
     }
 }

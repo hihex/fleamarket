@@ -65,11 +65,9 @@ class Channel {
     }
 
     File getInputApk(final Project project) {
-        /*
-        final apkName = "outputs/apk/${project.name}-${flavors ? flavors.join('-')+'-' : ''}${buildType}-unaligned.apk"
+        final apkName = "outputs/apk/${project.name}-${flavors ? flavors.join('-')+'-' : ''}${buildType}-unsigned.apk"
         new File(project.buildDir, apkName)
-        */
-        project.tasks[packageTaskName].outputs.files.singleFile
+        //project.tasks[packageTaskName].outputs.files.singleFile
     }
 }
 

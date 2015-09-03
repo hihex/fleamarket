@@ -1,21 +1,15 @@
 package hihex.fleamarket
 
-import hihex.fleamarket.utils.Files
 import nebula.test.IntegrationSpec
+import org.apache.commons.io.FileUtils
 import org.gradle.api.logging.LogLevel
 
 import java.util.zip.ZipFile
 
 class PluginTest extends IntegrationSpec {
-    //private static final String APK_LOCATION = '../testapk/build/outputs/apk/testapk-release.apk'
-
-    void linkOrCopy(String source, String target) {
-        Files.linkOrCopy(new File(source), new File(projectDir, target))
-    }
-
     @Override
     protected LogLevel getLogLevel() {
-        LogLevel.QUIET
+        LogLevel.INFO
     }
 
     def setup() {
@@ -35,15 +29,25 @@ class PluginTest extends IntegrationSpec {
                     versionCode 1
                 }
 
-                //REPLACEMENT
-            }
+                signingConfigs {
+                    release {
+                        storeFile file('keystore')
+                        storePassword 'aaaaaa'
+                        keyAlias 'mykey'
+                        keyPassword 'aaaaaa'
+                    }
+                }
         '''
 
-        linkOrCopy('../local.properties', 'local.properties')
-        linkOrCopy('../testapk/src', 'src')
+        FileUtils.copyFileToDirectory(new File('../local.properties'), projectDir)
+        FileUtils.copyFileToDirectory(new File('../testapk/keystore'), projectDir)
+        FileUtils.copyDirectoryToDirectory(new File('../testapk/src'), projectDir)
     }
 
     def 'applying FleaMarket plugin does not affect APK assembly'() {
+        given:
+        buildFile << '}'
+
         when:
         runTasksSuccessfully('assembleDebug')
 
@@ -54,6 +58,8 @@ class PluginTest extends IntegrationSpec {
     def 'defining channels extension does not affect normal APK assembly'() {
         given:
         buildFile << '''
+            }
+
             channels {
                 defaultConfig {}
                 create 'A', 'B', 'C', 'D'
@@ -70,6 +76,8 @@ class PluginTest extends IntegrationSpec {
     def 'list channels'() {
         given:
         buildFile << '''
+            }
+
             channels {
                 defaultConfig {}
                 create 'AChannel', 'BChannel', 'CChannel'
@@ -89,6 +97,8 @@ class PluginTest extends IntegrationSpec {
     def 'generate two channels'() {
         given:
         buildFile << '''
+            }
+
             channels {
                 defaultConfig {
                     filename { "${it.name}-v0.1.apk" }
@@ -111,14 +121,13 @@ class PluginTest extends IntegrationSpec {
         then:
         fileExists('build/outputs/flea-market/BChannel-v0.1.apk')
         timeElasped < 1.5e9
-
-        // Since we performed no modifications, the APKs from the two channels shall be equivalent.
-        file('build/outputs/flea-market/AChannel-v0.1.apk').bytes == file('build/outputs/flea-market/BChannel-v0.1.apk').bytes
     }
 
     def 'modify AndroidManifest.xml'() {
         given:
         buildFile << '''
+            }
+
             channels {
                 defaultConfig {}
                 create('my-channel') {
@@ -149,6 +158,8 @@ class PluginTest extends IntegrationSpec {
     def 'insert an asset'() {
         given:
         buildFile << '''
+            }
+
             channels {
                 defaultConfig {}
                 create('my-channel') {
@@ -176,6 +187,8 @@ class PluginTest extends IntegrationSpec {
     def 'image and strings replacement'() {
         given:
         buildFile << '''
+            }
+
             repositories {
                 jcenter()
             }
@@ -190,7 +203,7 @@ class PluginTest extends IntegrationSpec {
                     filename 'AltChannel.apk'
                     resources file('src/alt-channel/res')
                     values { rv, c ->
-                        rv.replaceStrings ~/[aeiou]/, 'ǝ'
+                        rv.replaceStrings ~/[aeiou]/, '_'
                     }
                 }
             }
@@ -202,8 +215,51 @@ class PluginTest extends IntegrationSpec {
         then:
         fileExists('build/outputs/flea-market/AltChannel.apk')
 
-        // output of `aapt d strings` is broken with Unicode :(
+        when:
+        final outputApk = file('build/outputs/flea-market/AltChannel.apk')
+        final replacedRes = new ZipFile(outputApk).with {
+            final entry = getEntry('res/drawable-hdpi-v4/ic_notification_android_labs_logo.png')
+            getInputStream(entry).bytes
+        }
 
-        // TODO Finish
+        then:
+        replacedRes == file('src/alt-channel/res/drawable-hdpi/ic_notification_android_labs_logo.png').bytes
+
+        when:
+        final aaptResult = ['aapt', 'd', 'strings', outputApk].execute().text
+
+        then:
+        aaptResult =~ /ABC B_ld _nd It_l_c w_th _nd_rsc_r_/
+        aaptResult =~ /T_st/
+        aaptResult =~ /F__t/
+    }
+
+    def 'signingConfig'() {
+        given:
+        buildFile << '''
+            }
+
+            channels {
+                defaultConfig {}
+                create('123abc') {
+                    signingConfig android.signingConfigs.release
+                    manifest { m, c ->
+                        m.analyticsChannel = c.name
+                    }
+                }
+            }
+        '''
+
+        when:
+        runTasksSuccessfully('assemble123abc')
+
+        then:
+        fileExists('build/outputs/flea-market/123abc.apk')
+
+        when:
+        final aaptResult = ['aapt', 'l', '-a', file('build/outputs/flea-market/123abc.apk')].execute().text
+
+        then:
+        aaptResult =~ /A: android:name\([^)]+\)="MY_CHANNEL" \([^)]+\)\s*A: android:value\([^)]+\)="123abc"/
     }
 }
