@@ -64,10 +64,12 @@ class Channel {
         }
     }
 
-    File getInputApk(final Project project) {
-        final apkName = "outputs/apk/${project.name}-${flavors ? flavors.join('-')+'-' : ''}${buildType}-unsigned.apk"
-        new File(project.buildDir, apkName)
-        //project.tasks[packageTaskName].outputs.files.singleFile
+    List<File> getInputApks(final Project project) {
+        final apkNameBase = "outputs/apk/${project.name}-${flavors ? flavors.join('-') + '-' : ''}${buildType}"
+        final unsigned = new File(project.buildDir, "$apkNameBase-unsigned.apk")
+        final unaligned = new File(project.buildDir, "$apkNameBase-unaligned.apk")
+        final signed = new File(project.buildDir, "${apkNameBase}.apk")
+        [unsigned, unaligned, signed]
     }
 }
 

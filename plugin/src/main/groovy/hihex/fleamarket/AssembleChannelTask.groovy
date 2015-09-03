@@ -42,8 +42,9 @@ class AssembleChannelTask extends DefaultTask {
     @InputFile
     File oldManifest
 
-    @InputFile
-    File oldApk
+    @InputFiles
+    @Optional
+    List<File> oldApks
 
     @OutputFile
     File outputFile
@@ -62,7 +63,7 @@ class AssembleChannelTask extends DefaultTask {
         final oldResDir = newChannel.intermediateDirName
         oldResources = new File(project.buildDir, "intermediates/res/merged/${oldResDir}")
         oldManifest = new File(project.buildDir, "intermediates/manifests/full/${oldResDir}/AndroidManifest.xml")
-        oldApk = newChannel.getInputApk(project)
+        oldApks = newChannel.getInputApks(project)
 
         dependsOn(newChannel.packageTaskName)
     }
@@ -148,10 +149,11 @@ class AssembleChannelTask extends DefaultTask {
 
     private File aapt(final File tempDir) {
         final unalignedApk = new File(tempDir, 'unaligned.apk')
+        final oldApk = oldApks.find { it.isFile() }
         FileUtils.copyFile(oldApk, unalignedApk)
 
         execute([
-                new File(buildTools, 'aapt'), 'p', '-u',
+                new File(buildTools, 'aapt'), 'p', '-u', '--no-crunch',
                 '-M', "$tempDir/AndroidManifest.xml",
                 '-F', unalignedApk,
                 '-I', androidJar,
@@ -181,8 +183,17 @@ class AssembleChannelTask extends DefaultTask {
 
             final zf = new ZipFile(unsignedApk)
             zf.entries().each { ZipEntry entry ->
-                final jarEntry = (entry.method == JarEntry.STORED) ? new JarEntry(entry) : new JarEntry(entry.name)
-                builder.invokeMethod('writeEntry', [zf.getInputStream(entry), jarEntry])
+                final jarEntry
+
+                switch (entry.name) {
+                case 'META-INF/MANIFEST.MF':
+                case ~/META-INF\/\w+.(?:SF|RSA|DSA|EC)/:
+                    break
+                default:
+                    jarEntry = (entry.method == JarEntry.STORED) ? new JarEntry(entry) : new JarEntry(entry.name)
+                    builder.invokeMethod('writeEntry', [zf.getInputStream (entry), jarEntry])
+                    break
+                }
             }
             builder.close()
         }

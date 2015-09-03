@@ -268,6 +268,7 @@ class PluginTest extends IntegrationSpec {
     }
 
     def 'interaction with productFlavors'() {
+        given:
         buildFile << '''
                 productFlavors {
                     first
@@ -279,6 +280,29 @@ class PluginTest extends IntegrationSpec {
                 defaultConfig {
                     flavors 'first'
                 }
+                create 'alt'
+            }
+        '''
+
+        when:
+        runTasksSuccessfully('assembleAlt')
+
+        then:
+        fileExists('build/outputs/flea-market/alt.apk')
+    }
+
+    def 'interaction with provided signingConfig'() {
+        given:
+        buildFile << '''
+                buildTypes {
+                    release {
+                        signingConfig signingConfigs.release
+                    }
+                }
+            }
+
+            channels {
+                defaultConfig {}
                 create 'alt'
             }
         '''

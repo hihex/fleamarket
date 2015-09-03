@@ -5,7 +5,7 @@ import org.gradle.api.logging.Logger
 
 @CompileStatic
 class LoggerAppendable implements Appendable {
-    private StringBuilder line
+    private StringBuilder line = new StringBuilder()
     private final Logger logger
     private final LogLevel level
 
@@ -21,12 +21,14 @@ class LoggerAppendable implements Appendable {
 
     @Override
     Appendable append(final CharSequence csq, final int start, final int end) throws IOException {
-        (start ..< end).each { i -> append(csq[i]) }
+        for (int i = start; i < end; ++ i) {
+            append(csq.charAt(i))
+        }
         this
     }
 
     @Override
-    Appendable append(char c) throws IOException {
+    Appendable append(final char c) throws IOException {
         if (c != '\n') {
             line.append(c)
         } else {
