@@ -13,3 +13,6 @@ script:
     - ./gradlew plugin:jar testapk:assembleDebug -q
     - ./gradlew plugin:test --stacktrace
 
+after_success:
+    - ./gradlew plugin:jacoco plugin:coveralls
+
