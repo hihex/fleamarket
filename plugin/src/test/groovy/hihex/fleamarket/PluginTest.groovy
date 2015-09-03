@@ -39,7 +39,11 @@ class PluginTest extends IntegrationSpec {
                 }
         '''
 
-        FileUtils.copyFileToDirectory(new File('../local.properties'), projectDir)
+        try {
+            FileUtils.copyFileToDirectory(new File('../local.properties'), projectDir)
+        } catch (final FileNotFoundException ignored) {
+        }
+
         FileUtils.copyFileToDirectory(new File('../testapk/keystore'), projectDir)
         FileUtils.copyDirectoryToDirectory(new File('../testapk/src'), projectDir)
     }

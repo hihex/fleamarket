@@ -26,9 +26,8 @@ import java.util.zip.ZipFile
 class AssembleChannelTask extends DefaultTask {
     Channel channel
 
-    File sdk
-
-    String apiLevel
+    File buildTools
+    File androidJar
 
     @Optional
     @InputFiles
@@ -89,8 +88,12 @@ class AssembleChannelTask extends DefaultTask {
         // Ref: http://stackoverflow.com/a/28161842/ to get the SDK directory.
         final android = (BaseExtension) project.property('android')
         android.with {
-            sdk = sdkDirectory
-            apiLevel = compileSdkVersion
+            androidJar = new File(sdkDirectory, "platforms/$compileSdkVersion/android.jar")
+            buildTools = new File(sdkDirectory, "build-tools/$buildToolsVersion")
+
+            assert androidJar.isFile()
+            assert buildTools.isDirectory()
+
             if (!channel.signingConfig) {
                 channel.signingConfig = signingConfigs.findByName(BuilderConstants.DEBUG)
             }
@@ -148,10 +151,10 @@ class AssembleChannelTask extends DefaultTask {
         FileUtils.copyFile(oldApk, unalignedApk)
 
         execute([
-                "$sdk/bin/aapt", 'p', '-u',
+                new File(buildTools, 'aapt'), 'p', '-u',
                 '-M', "$tempDir/AndroidManifest.xml",
                 '-F', unalignedApk,
-                '-I', "$sdk/platforms/$apiLevel/android.jar",
+                '-I', androidJar,
                 '-A', "$tempDir/assets",
                 '-S', "$tempDir/res",
                 *channel.resources.collect { ['-S', it] }.flatten(),
@@ -191,13 +194,7 @@ class AssembleChannelTask extends DefaultTask {
         // For some unknown reason we may need to call 'zipalign' multiple times to correctly align file. Perhaps
         // related to the double-entry bug mentioned above.
 
-        execute(["$sdk/bin/zipalign", '-f', '4', signedApk, outputFile])
-        /*
-        while () {
-            signedApk.delete()
-            outputFile.renameTo(signedApk)
-        }
-        */
+        execute([new File(buildTools, 'zipalign'), '-f', '4', signedApk, outputFile])
     }
 
     private void execute(final List args) {
