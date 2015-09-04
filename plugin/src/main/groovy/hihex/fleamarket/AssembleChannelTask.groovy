@@ -10,6 +10,7 @@ import hihex.fleamarket.model.ResValue
 import hihex.fleamarket.utils.Files
 import hihex.fleamarket.utils.LoggerAppendable
 import hihex.fleamarket.utils.Xml
+import hihex.fleamarket.utils.Zip
 import org.apache.commons.io.FileUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
@@ -150,7 +151,10 @@ class AssembleChannelTask extends DefaultTask {
     private File aapt(final File tempDir) {
         final unalignedApk = new File(tempDir, 'unaligned.apk')
         final oldApk = oldApks.find { it.isFile() }
+
+        // We need to clear the file modification time of the zip file to ensure updating is successful.
         FileUtils.copyFile(oldApk, unalignedApk)
+        Zip.clearTimestamps(unalignedApk)
 
         execute([
                 new File(buildTools, 'aapt'), 'p', '-u', '--no-crunch',

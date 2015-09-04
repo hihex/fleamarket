@@ -13,15 +13,11 @@ class Files {
         try {
             NioFiles.createSymbolicLink(targetPath, sourcePath)
         } catch (UnsupportedOperationException ignored) {
-            copy(source, target)
-        }
-    }
-
-    static void copy(final File source, final File target) {
-        if (source.isDirectory()) {
-            FileUtils.copyDirectory(source, target)
-        } else {
-            NioFiles.copy(source.toPath(), target.toPath())
+            if (source.isDirectory()) {
+                FileUtils.copyDirectory(source, target)
+            } else {
+                NioFiles.copy(source.toPath(), target.toPath())
+            }
         }
     }
 }
