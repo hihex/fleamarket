@@ -3,6 +3,7 @@ import hihex.fleamarket.utils.FileOps
 import nebula.test.IntegrationSpec
 import org.gradle.api.logging.LogLevel
 
+import java.nio.file.NoSuchFileException
 import java.util.zip.ZipFile
 
 class PluginTest extends IntegrationSpec {
@@ -40,7 +41,7 @@ class PluginTest extends IntegrationSpec {
 
         try {
             FileOps.copyRecursivelyToDirectory(new File('../local.properties'), projectDir)
-        } catch (final FileNotFoundException ignored) {
+        } catch (final NoSuchFileException ignored) {
         }
 
         FileOps.copyRecursivelyToDirectory(new File('../testapk/keystore'), projectDir)

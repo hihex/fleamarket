@@ -1,15 +1,13 @@
 package hihex.fleamarket
-
 import hihex.fleamarket.utils.Zip
 import spock.lang.Specification
 
-import java.nio.file.attribute.FileTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 class ZipTest extends Specification {
-    private static final MIN_TIME = FileTime.fromMillis(315532800000L + 86400L)
+    private static final long MIN_TIME = (365*10+3)*86400_000L
 
     def 'can clear timestamp'() {
         given:
@@ -26,14 +24,14 @@ class ZipTest extends Specification {
         }
 
         when: 'ensure the zip file has the timestamps filled in'
-        final modifiedTimes = new ZipFile(file).entries().collect { it.lastModifiedTime }
+        final modifiedTimes = new ZipFile(file).entries().collect { it.time }
 
         then:
         assert modifiedTimes.min() > MIN_TIME
 
         when: 'now clear the timestamps'
         Zip.clearTimestamps(file)
-        final newModifiedTimes = new ZipFile(file).entries().collect { it.lastModifiedTime }
+        final newModifiedTimes = new ZipFile(file).entries().collect { it.time }
 
         then:
         assert modifiedTimes.size() == newModifiedTimes.size()
