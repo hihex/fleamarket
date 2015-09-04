@@ -12,7 +12,6 @@ plugins {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'commons-io:commons-io:2.4'
 
     provided 'com.android.tools.build:gradle:1.3.+'
 

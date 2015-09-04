@@ -7,18 +7,19 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import hihex.fleamarket.model.Channel
 import hihex.fleamarket.model.ResValue
-import hihex.fleamarket.utils.Files
+import hihex.fleamarket.utils.FileOps
 import hihex.fleamarket.utils.LoggerAppendable
 import hihex.fleamarket.utils.Xml
 import hihex.fleamarket.utils.Zip
-import org.apache.commons.io.FileUtils
 import org.gradle.api.DefaultTask
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.FileTree
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.*
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 
+import java.nio.file.Files
 import java.util.jar.JarEntry
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -75,7 +76,7 @@ class AssembleChannelTask extends DefaultTask {
         outputFile.parentFile.mkdirs()
         final tempDir = temporaryDir
 
-        FileUtils.cleanDirectory(tempDir)
+        FileOps.clearDirectory(tempDir)
 
         writeManifest(tempDir)
         writeResValues(tempDir)
@@ -144,20 +145,29 @@ class AssembleChannelTask extends DefaultTask {
         channel.assets.each { targetName, source ->
             final target = new File(tempDir, "assets/$targetName")
             target.parentFile.mkdirs()
-            Files.linkOrCopy(source, target)
+
+            final sourcePath = source.absoluteFile.toPath()
+            final targetPath = target.toPath()
+            try {
+                Files.createSymbolicLink(targetPath, sourcePath)
+            } catch (UnsupportedOperationException ignored) {
+                FileOps.copyRecursively(source, target)
+            }
         }
     }
 
     private File aapt(final File tempDir) {
+        checkResourceSubset()
+
         final unalignedApk = new File(tempDir, 'unaligned.apk')
         final oldApk = oldApks.find { it.isFile() }
 
         // We need to clear the file modification time of the zip file to ensure updating is successful.
-        FileUtils.copyFile(oldApk, unalignedApk)
+        Files.copy(oldApk.toPath(), unalignedApk.toPath())
         Zip.clearTimestamps(unalignedApk)
 
         execute([
-                new File(buildTools, 'aapt'), 'p', '-u', '--no-crunch',
+                new File(buildTools, 'aapt'), 'p', '-u', '-v', '--no-crunch',
                 '-M', "$tempDir/AndroidManifest.xml",
                 '-F', unalignedApk,
                 '-I', androidJar,
@@ -209,7 +219,7 @@ class AssembleChannelTask extends DefaultTask {
         // For some unknown reason we may need to call 'zipalign' multiple times to correctly align file. Perhaps
         // related to the double-entry bug mentioned above.
 
-        execute([new File(buildTools, 'zipalign'), '-f', '4', signedApk, outputFile])
+        execute([new File(buildTools, 'zipalign'), '-v', '-f', '4', signedApk, outputFile])
     }
 
     private void execute(final List args) {
@@ -220,6 +230,25 @@ class AssembleChannelTask extends DefaultTask {
             final stderr = new LoggerAppendable(logger, LogLevel.ERROR)
             waitForProcessOutput(stdout, stderr)
             assert exitValue() == 0
+        }
+    }
+
+    private void checkResourceSubset() {
+        final oldResPath = oldResources.toPath()
+        channel.resources.each { res ->
+            final resPath = res.toPath()
+            res.eachDir { d ->
+                if (d.name.startsWith('values')) {
+                    throw new InvalidUserDataException("Cannot define resource values here, because we need to ensure R.java remains unchanged. Remove `$d` and use the values{} block instead.")
+                }
+                d.eachFile { f ->
+                    final relPath = resPath.relativize(f.toPath())
+                    final oldPath = oldResPath.resolve(relPath)
+                    if (!Files.exists(oldPath)) {
+                        throw new InvalidUserDataException("Cannot create a new resource `$f`, because we need to ensure R.java remains unchanged.")
+                    }
+                }
+            }
         }
     }
 }

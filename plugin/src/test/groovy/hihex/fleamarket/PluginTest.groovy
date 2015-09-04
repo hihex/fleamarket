@@ -1,7 +1,6 @@
 package hihex.fleamarket
-
+import hihex.fleamarket.utils.FileOps
 import nebula.test.IntegrationSpec
-import org.apache.commons.io.FileUtils
 import org.gradle.api.logging.LogLevel
 
 import java.util.zip.ZipFile
@@ -40,12 +39,12 @@ class PluginTest extends IntegrationSpec {
         '''
 
         try {
-            FileUtils.copyFileToDirectory(new File('../local.properties'), projectDir)
+            FileOps.copyRecursivelyToDirectory(new File('../local.properties'), projectDir)
         } catch (final FileNotFoundException ignored) {
         }
 
-        FileUtils.copyFileToDirectory(new File('../testapk/keystore'), projectDir)
-        FileUtils.copyDirectoryToDirectory(new File('../testapk/src'), projectDir)
+        FileOps.copyRecursivelyToDirectory(new File('../testapk/keystore'), projectDir)
+        FileOps.copyRecursivelyToDirectory(new File('../testapk/src'), projectDir)
     }
 
     def 'applying FleaMarket plugin does not affect APK assembly'() {
@@ -312,5 +311,25 @@ class PluginTest extends IntegrationSpec {
 
         then:
         fileExists('build/outputs/flea-market/alt.apk')
+    }
+
+    def 'should not be able to add a random resource'() {
+        given:
+        final newXmlFile = file('src/alt/res/xml/aaaa.xml')
+        newXmlFile << '<?xml version="1.0" encoding="UTF-8"?><View/>'
+
+        buildFile << '''
+            }
+
+            channels {
+                defaultConfig {}
+                create('alt') {
+                    resources file('src/alt/res')
+                }
+            }
+        '''
+
+        expect:
+        runTasksWithFailure('assembleAlt')
     }
 }
