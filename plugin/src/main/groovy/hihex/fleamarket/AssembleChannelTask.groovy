@@ -226,7 +226,7 @@ class AssembleChannelTask extends DefaultTask {
         logger.info(args.join(' '))
 
         args.execute().with {
-            final stdout = new LoggerAppendable(logger, LogLevel.INFO)
+            final stdout = new LoggerAppendable(logger, LogLevel.DEBUG)
             final stderr = new LoggerAppendable(logger, LogLevel.ERROR)
             waitForProcessOutput(stdout, stderr)
             assert exitValue() == 0

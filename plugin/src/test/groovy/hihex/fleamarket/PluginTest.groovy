@@ -1,9 +1,12 @@
 package hihex.fleamarket
+
 import hihex.fleamarket.utils.FileOps
 import nebula.test.IntegrationSpec
 import org.gradle.api.logging.LogLevel
 
+import java.nio.file.Files
 import java.nio.file.NoSuchFileException
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 
 class PluginTest extends IntegrationSpec {
@@ -27,6 +30,10 @@ class PluginTest extends IntegrationSpec {
                     targetSdkVersion 22
                     versionName '1.0'
                     versionCode 1
+                }
+
+                lintOptions {
+                    checkReleaseBuilds false
                 }
 
                 signingConfigs {
@@ -118,13 +125,10 @@ class PluginTest extends IntegrationSpec {
         fileExists('build/outputs/flea-market/AChannel-v0.1.apk')
 
         when:
-        final now = System.nanoTime()
         runTasksSuccessfully('assembleBChannel')
-        final timeElasped = System.nanoTime() - now
 
         then:
         fileExists('build/outputs/flea-market/BChannel-v0.1.apk')
-        timeElasped < 1.5e9
     }
 
     def 'modify AndroidManifest.xml'() {
@@ -332,5 +336,44 @@ class PluginTest extends IntegrationSpec {
 
         expect:
         runTasksWithFailure('assembleAlt')
+    }
+
+    def 'benchmark multiple channels'() {
+        given:
+        buildFile << '''
+            }
+
+            channels {
+                defaultConfig {
+                    manifest { m, c ->
+                        m.analyticsChannel = c.name
+                    }
+                }
+                for (int i = 0; i < 100; ++ i) {
+                    create "channel$i"
+                }
+            }
+        '''
+
+        // Populate the resources with a bunch of files to simulate real usage.
+        final copySource = file("src/main/res/drawable/ic_launcher.png")
+        for (int i = 0; i < 100; ++ i) {
+            final copyTarget = file("src/main/res/drawable/resource_${i}.png")
+            Files.copy(copySource.toPath(), copyTarget.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+
+        expect:
+        runTasksSuccessfully('assembleRelease')
+
+        when:
+        final String[] tasks = (0 ..< 100).collect { "assembleChannel$it" }
+        final timingBegin = System.nanoTime()
+        runTasksSuccessfully(*tasks)
+        final timingEnd = System.nanoTime()
+
+        then:
+        println "Timing: ${(timingEnd - timingBegin) / (100e9)} s/APK"
+        // We promise 2.0 s/APK for very simple APKs.
+        (timingEnd - timingBegin) <= 100 * 2.0e9
     }
 }
