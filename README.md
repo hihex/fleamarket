@@ -28,7 +28,7 @@ Add the plugin to the beginning of the `build.gradle` of the application module:
 
 ```gradle
 plugins {
-    id 'hihex.fleamarket' version '0.1.2'
+    id 'hihex.fleamarket' version '0.1.3'
 }
 apply plugin: 'com.android.application'
 ...
