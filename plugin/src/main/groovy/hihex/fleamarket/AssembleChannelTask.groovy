@@ -121,10 +121,14 @@ class AssembleChannelTask extends DefaultTask {
             final String qualifier = (folderName == 'values') ? null : folderName[7..-1]
             final values = Xml.read(new File(folder, "${folderName}.xml"))
 
+
+
             values.documentElement.childNodes.each { Node node ->
                 if (node.nodeType == Node.ELEMENT_NODE) {
                     final element = (Element) node
-                    if (element.hasAttributeNS(null, 'name')) {
+                    if (element.tagName == 'declare-styleable') {
+                        element.parentNode.removeChild(element)
+                    } else if (element.hasAttributeNS(null, 'name')) {
                         final resValue = new ResValue(qualifier, element)
                         channel.valueReplacements.each {
                             it.execute(resValue, channel)

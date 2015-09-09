@@ -9,4 +9,13 @@
     <dimen name="some_dimen_px">55px</dimen>
     <dimen name="some_dimen_in">2.54in</dimen>
     <dimen name="some_dimen_mm">3.1415926535897932384626433832795028841971693993751058209749445923078164mm</dimen>
+
+    <declare-styleable name="MyView">
+        <attr name="text" format="string"/>
+        <attr name="color" format="enum">
+            <enum name="red" value="0xfffff0000"/>
+            <enum name="green" value="0xff009900"/>
+            <enum name="blue" value="0xff3333ff"/>
+        </attr>
+    </declare-styleable>
 </resources>
