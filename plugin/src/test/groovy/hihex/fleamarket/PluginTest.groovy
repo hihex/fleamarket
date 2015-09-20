@@ -140,10 +140,10 @@ class PluginTest extends IntegrationSpec {
                 defaultConfig {}
                 create('my-channel') {
                     filename 'MyChannel.apk'
-                    manifest { m, c ->
-                        m.analyticsChannel = c.name
-                        m.deleteTagsWithName 'activity', 'com.example.testapk.FirstActivity'
-                        m.addUsesPermission 'com.example.TEST_PERMISSION'
+                    manifest { c ->
+                        analyticsChannel = c.name
+                        deleteTagsWithName 'activity', 'com.example.testapk.FirstActivity'
+                        addUsesPermission 'com.example.TEST_PERMISSION'
                     }
                 }
             }
@@ -212,8 +212,8 @@ class PluginTest extends IntegrationSpec {
                 create('altChannel') {
                     filename 'AltChannel.apk'
                     resources file('src/alt-channel/res')
-                    values { rv, c ->
-                        rv.replaceStrings ~/[aeiou]/, '_'
+                    values {
+                        replaceStrings ~/[aeiou]/, '_'
                     }
                 }
             }
@@ -253,8 +253,8 @@ class PluginTest extends IntegrationSpec {
                 defaultConfig {}
                 create('123abc') {
                     signingConfig android.signingConfigs.release
-                    manifest { m, c ->
-                        m.analyticsChannel = c.name
+                    manifest { c ->
+                        analyticsChannel = c.name
                     }
                 }
             }
@@ -347,8 +347,8 @@ class PluginTest extends IntegrationSpec {
 
             channels {
                 defaultConfig {
-                    manifest { m, c ->
-                        m.analyticsChannel = c.name
+                    manifest { c ->
+                        analyticsChannel = c.name
                     }
                 }
                 for (int i = 0; i < 100; ++ i) {
@@ -397,4 +397,30 @@ class PluginTest extends IntegrationSpec {
         expect:
         runTasksSuccessfully('assembleAlt')
     }
+
+    def 'old 2-arg closure syntax'() {
+        given:
+        buildFile << '''
+            }
+
+            channels {
+                defaultConfig {}
+                create('alt') {
+                    manifest { m, c ->
+                        m.analyticsChannel = c.name
+                    }
+                }
+            }
+        '''
+
+        expect:
+        runTasksSuccessfully('assembleAlt')
+
+        when:
+        final aaptResult = ['aapt', 'l', '-a', file('build/outputs/flea-market/alt.apk')].execute().text
+
+        then:
+        aaptResult =~ /A: android:name\([^)]+\)="MY_CHANNEL" \([^)]+\)\s*A: android:value\([^)]+\)="alt"/
+    }
+
 }

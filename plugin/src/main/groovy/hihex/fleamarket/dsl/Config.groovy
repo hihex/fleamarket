@@ -2,6 +2,7 @@ package hihex.fleamarket.dsl
 import com.android.builder.model.SigningConfig
 import groovy.transform.CompileStatic
 import hihex.fleamarket.model.ChannelAction
+import hihex.fleamarket.model.ChannelActions
 import hihex.fleamarket.model.ChannelFilename
 import hihex.fleamarket.model.Channel
 import hihex.fleamarket.model.ResValue
@@ -77,12 +78,31 @@ class Config {
     }
 
     /**
+     * Defines a list of modifications that should be performed on the AndroidManifest.xml for this APK.
+     *
+     * @param modifications The modifications that may be applied on the XML document.
+     * @see hihex.fleamarket.ExtensionModule
+     */
+    void manifest(final Closure<?> modifications) {
+        channel.manifestModifications << ChannelActions.fromClosure(modifications)
+    }
+
+    /**
      * Replaces the resource values (e.g. strings, colors, dimensions).
      *
      * @param replacement The replacement acted on every resource values.
      */
     void values(final ChannelAction<ResValue> replacements) {
         channel.valueReplacements << replacements
+    }
+
+    /**
+     * Replaces the resource values (e.g. strings, colors, dimensions).
+     *
+     * @param replacement The replacement acted on every resource values.
+     */
+    void values(final Closure<?> replacements) {
+        channel.valueReplacements << ChannelActions.fromClosure(replacements)
     }
 
     /**

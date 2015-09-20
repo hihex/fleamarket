@@ -1,4 +1,5 @@
 package hihex.fleamarket
+
 import com.android.build.gradle.BaseExtension
 import com.android.builder.core.BuilderConstants
 import com.android.builder.signing.SignedJarBuilder
@@ -123,8 +124,6 @@ class AssembleChannelTask extends DefaultTask {
             final folderName = folder.name
             final String qualifier = (folderName == 'values') ? null : folderName[7..-1]
             final values = Xml.read(new File(folder, "${folderName}.xml"))
-
-
 
             values.documentElement.childNodes.each { Node node ->
                 if (node.nodeType == Node.ELEMENT_NODE) {
