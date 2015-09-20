@@ -28,7 +28,7 @@ Add the plugin to the beginning of the `build.gradle` of the application module:
 
 ```gradle
 plugins {
-    id 'hihex.fleamarket' version '0.1.3'
+    id 'hihex.fleamarket' version '0.2.0'
 }
 apply plugin: 'com.android.application'
 ...
@@ -43,7 +43,7 @@ The configurations that lead to different APKs are called "channels". These conf
 channels {
     defaultConfig {
         filename { "${it.name}-v${VERSION_NAME}.apk" }
-        manifest { m, c -> m.analyticsChannel = c.name }
+        manifest { c -> analyticsChannel = c.name }
     }
     create 'google', 'amazon', 'getjar', 'slideme', 'fdroid', 'samsung'
     create('baidu') {
@@ -68,11 +68,11 @@ defaultConfig {
     signingConfig android.signingConfig.release
     buildType 'release'
     flavors 'armv7', 'paidapp'
-    manifest { Document m, Channel c ->
-        m.analyticsChannel = c.name
+    manifest { Channel c ->
+        analyticsChannel = c.name
     }
-    values { ResValue r, Channel c ->
-        r.replaceStrings ~/MyOldBrand/, 'MyNewBrand'
+    values {
+        replaceStrings ~/MyOldBrand/, 'MyNewBrand'
     }
     asset 'www/index.html', file('src/customized/default/assets/www/index.html')
     resources file('src/customized/default/res')
@@ -86,8 +86,8 @@ defaultConfig {
 | `signingConfig`   | The private key used to [sign the APK](https://developer.android.com/tools/publishing/app-signing.html). If not specified, this plugin will use the debug key to sign the APK. |
 | `buildType`       | Which buildType the channel should modify from. Should be either `release` or `debug`.    |
 | `flavors`         | The productFlavor the channel should modify from. Each channel should base on exactly one [build variant](http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Build-Variants) (buildType + productFlavor).
-| `manifest`        | Defines a **([Document](https://docs.oracle.com/javase/8/docs/api/org/w3c/dom/Document.html), [Channel](#Channel)) → void** closure to modify the AndroidManifest.xml file.    |
-| `values`          | Defines a **([ResValue](#ResValue), [Channel](#Channel)) → void** closure to modify all resource values (strings, colors, dimensions, integers, etc.) |
+| `manifest`        | Defines a **[Document](https://docs.oracle.com/javase/8/docs/api/org/w3c/dom/Document.html).([Channel](#Channel)) → void)** closure to modify the AndroidManifest.xml file.    |
+| `values`          | Defines a **[ResValue](#ResValue).([Channel](#Channel)) → void)** closure to modify all resource values (strings, colors, dimensions, integers, etc.) |
 | `asset`           | Insert or replace a file to the assets folder.                                            |
 | `resources`       | Replaces existing resources (drawables, layouts, xmls, etc.). The folder should have the same structure as normal res/ folders. |
 
@@ -130,6 +130,12 @@ interface Document {
 
     /// Delete all tags which have the given tag name and `android:name`.
     def deleteTagsWithName(String tagName, String name)
+
+    /// Adds a <uses-permission> tag
+    def addUsesPermission(String permissionName)
+
+    /// Changes the android:name of all tags
+    def renameTags(Pattern namePattern, replacement)
 }
 ```
 

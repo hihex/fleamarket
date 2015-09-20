@@ -53,13 +53,11 @@ class ResValue {
      * to change all references to a brand name in a channel, e.g.
      *
      * <pre>
-     * values { channel, resValues ->
-     *     resValues.with {
-     *         if (qualifier =~ /\bes\b/) {
-     *             xml.replaceStrings ~/PlataformaCompetidor/, 'PlataformaSocio'
-     *         } else {
-     *             xml.replaceStrings ~/CompetitorPlatform/, 'PartnerPlatform'
-     *         }
+     * values {
+     *     if (qualifier =~ /\bes\b/) {
+     *         xml.replaceStrings ~/PlataformaCompetidor/, 'PlataformaSocio'
+     *     } else {
+     *         xml.replaceStrings ~/CompetitorPlatform/, 'PartnerPlatform'
      *     }
      * }
      * </pre>
