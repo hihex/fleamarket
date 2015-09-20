@@ -376,4 +376,24 @@ class PluginTest extends IntegrationSpec {
         // We promise 2.0 s/APK for very simple APKs.
         (timingEnd - timingBegin) <= 100 * 2.0e9
     }
+
+    def 'ignored files in resources will not cause exception'() {
+        given:
+        createFile 'src/alt/res/xml/.DS_Store'
+
+        buildFile << '''
+            }
+
+            channels {
+                defaultConfig {}
+                create('alt') {
+                    resources file('src/alt/res')
+                }
+            }
+        '''
+
+        expect:
+        runTasksSuccessfully('assembleAlt')
+    }
+
 }

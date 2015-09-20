@@ -21,11 +21,14 @@ import org.w3c.dom.Node
 
 import java.nio.file.Files
 import java.util.jar.JarEntry
+import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 @CompileStatic
 class AssembleChannelTask extends DefaultTask {
+    private static final Pattern IGNORED_ASSET_PATTERN = ~/^\.|\.scc$|^(?i:thumbs\.db|CVS|picasa.ini)$/
+
     Channel channel
 
     File buildTools
@@ -246,13 +249,19 @@ class AssembleChannelTask extends DefaultTask {
                     throw new InvalidUserDataException("Cannot define resource values here, because we need to ensure R.java remains unchanged. Remove `$d` and use the values{} block instead.")
                 }
                 d.eachFile { f ->
-                    final relPath = resPath.relativize(f.toPath())
-                    final oldPath = oldResPath.resolve(relPath)
-                    if (!Files.exists(oldPath)) {
-                        throw new InvalidUserDataException("Cannot create a new resource `$f`, because we need to ensure R.java remains unchanged.")
+                    if (!isIgnored(f.name)) {
+                        final relPath = resPath.relativize(f.toPath())
+                        final oldPath = oldResPath.resolve(relPath)
+                        if (!Files.exists(oldPath)) {
+                            throw new InvalidUserDataException("Cannot create a new resource `$f`, because we need to ensure R.java remains unchanged.")
+                        }
                     }
                 }
             }
         }
+    }
+
+    private static boolean isIgnored(final String filename) {
+        filename =~ IGNORED_ASSET_PATTERN
     }
 }
