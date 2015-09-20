@@ -11,6 +11,7 @@ final class FleaMarketPlugin implements Plugin<Project> {
         // FIXME Figure out the extension methods do not work.
         Document.metaClass.setAnalyticsChannel = { c -> ExtensionModule.setAnalyticsChannel(delegate, c) }
         Document.metaClass.deleteTagsWithName = { t, n -> ExtensionModule.deleteTagsWithName(delegate, t, n) }
+        Document.metaClass.addUsesPermission = { n -> ExtensionModule.addUsesPermission(delegate, n) }
 
         project.with {
             extensions.create('channels', Channels)

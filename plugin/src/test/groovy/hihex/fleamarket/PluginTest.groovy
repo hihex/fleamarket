@@ -143,6 +143,7 @@ class PluginTest extends IntegrationSpec {
                     manifest { m, c ->
                         m.analyticsChannel = c.name
                         m.deleteTagsWithName 'activity', 'com.example.testapk.FirstActivity'
+                        m.addUsesPermission 'com.example.TEST_PERMISSION'
                     }
                 }
             }
@@ -161,6 +162,7 @@ class PluginTest extends IntegrationSpec {
         aaptResult =~ /A: android:name\([^)]+\)="MY_CHANNEL" \([^)]+\)\s*A: android:value\([^)]+\)="my-channel"/
         !(aaptResult =~ /E: activity \([^)]+\)\s*A: android:name\([^)]+\)="com\.example\.testapk\.FirstActivity"/)
         aaptResult =~ /E: activity \([^)]+\)\s*A: android:name\([^)]+\)="com\.example\.testapk\.SecondActivity"/
+        aaptResult =~ /E: uses-permission \([^)]+\)\s*A: android:name\([^)]+\)="com\.example\.TEST_PERMISSION"/
     }
 
     def 'insert an asset'() {
@@ -395,5 +397,4 @@ class PluginTest extends IntegrationSpec {
         expect:
         runTasksSuccessfully('assembleAlt')
     }
-
 }

@@ -68,4 +68,16 @@ class ExtensionModule {
             }
         }
     }
+
+    /**
+     * Adds a {@code <uses-permission>} tag to the end of the root element (i.e. the {@code <manifest>} tag)
+     *
+     * @param self An XML document.
+     * @param name The permission name, e.g. {@code 'android.permission.INTERNET'}.
+     */
+    static void addUsesPermission(final Document self, final String name) {
+        final permission = self.createElement('uses-permission')
+        permission.setAttributeNS(ANDROID_NAMESPACE, 'android:name', name)
+        self.documentElement.appendChild(permission)
+    }
 }
