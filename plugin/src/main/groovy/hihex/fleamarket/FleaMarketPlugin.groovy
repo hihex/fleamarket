@@ -12,6 +12,7 @@ final class FleaMarketPlugin implements Plugin<Project> {
         Document.metaClass.setAnalyticsChannel = { c -> ExtensionModule.setAnalyticsChannel(delegate, c) }
         Document.metaClass.deleteTagsWithName = { t, n -> ExtensionModule.deleteTagsWithName(delegate, t, n) }
         Document.metaClass.addUsesPermission = { n -> ExtensionModule.addUsesPermission(delegate, n) }
+        Document.metaClass.renameTags = { p, r -> ExtensionModule.renameTags(delegate, p, r) }
 
         project.with {
             extensions.create('channels', Channels)

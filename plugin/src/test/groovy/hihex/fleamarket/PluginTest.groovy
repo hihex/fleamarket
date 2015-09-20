@@ -423,4 +423,29 @@ class PluginTest extends IntegrationSpec {
         aaptResult =~ /A: android:name\([^)]+\)="MY_CHANNEL" \([^)]+\)\s*A: android:value\([^)]+\)="alt"/
     }
 
+    def 'renameTags'() {
+        given:
+        buildFile << '''
+            }
+
+            channels {
+                defaultConfig {}
+                create('alt') {
+                    manifest {
+                        renameTags ~/^com\\.example\\.(.+)/, 'test.$1'
+                    }
+                }
+            }
+        '''
+
+        expect:
+        runTasksSuccessfully('assembleAlt')
+
+        when:
+        final aaptResult = ['aapt', 'l', '-a', file('build/outputs/flea-market/alt.apk')].execute().text
+
+        then:
+        !(aaptResult =~ /A: android:name\([^)]+\)="com\.example\./)
+        aaptResult =~ /A: android:name\([^)]+\)="test\./
+    }
 }

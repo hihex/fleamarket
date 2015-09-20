@@ -1,5 +1,6 @@
 package hihex.fleamarket
 import groovy.transform.CompileStatic
+import org.gradle.api.InvalidUserCodeException
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 
@@ -79,5 +80,31 @@ class ExtensionModule {
         final permission = self.createElement('uses-permission')
         permission.setAttributeNS(ANDROID_NAMESPACE, 'android:name', name)
         self.documentElement.appendChild(permission)
+    }
+
+    /**
+     * Change the {@code android:name} of all tags.
+     *
+     * @param self An XML document.
+     * @param namePattern The pattern of the names to be replaced.
+     * @param replacement The replacement string (may use variables like "$1") or a closure (see
+     *                    {@link org.codehaus.groovy.runtime.StringGroovyMethods#replaceAll(CharSequence, Pattern, Closure)
+     *                    replaceAll(Pattern, Closure)}).
+     */
+    static void renameTags(final Document self, final Pattern namePattern, final Object replacement) {
+        self.getElementsByTagName('*').each { Element tag ->
+            final String name = tag.getAttributeNS(ANDROID_NAMESPACE, 'name')
+            if (name) {
+                final String newName
+                if (replacement instanceof CharSequence) {
+                    newName = name.replaceAll(namePattern, replacement)
+                } else if (replacement instanceof Closure) {
+                    newName = name.replaceAll(namePattern, replacement)
+                } else {
+                    throw new InvalidUserCodeException("replacement in Document.renameTags() must either be a String or a Closure")
+                }
+                tag.setAttributeNS(ANDROID_NAMESPACE, 'android:name', newName)
+            }
+        }
     }
 }
