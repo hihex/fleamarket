@@ -128,7 +128,7 @@ class AssembleChannelTask extends DefaultTask {
             values.documentElement.childNodes.each { Node node ->
                 if (node.nodeType == Node.ELEMENT_NODE) {
                     final element = (Element) node
-                    if (element.tagName == 'declare-styleable') {
+                    if (element.tagName == 'declare-styleable' || element.tagName == 'attr') {
                         element.parentNode.removeChild(element)
                     } else if (element.hasAttributeNS(null, 'name')) {
                         final resValue = new ResValue(qualifier, element)

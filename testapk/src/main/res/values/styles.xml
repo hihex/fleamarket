@@ -18,4 +18,6 @@
             <enum name="blue" value="0xff3333ff"/>
         </attr>
     </declare-styleable>
+
+    <attr name="hello" format="string"/>
 </resources>
