@@ -233,7 +233,7 @@ class PluginTest extends IntegrationSpec {
         }
 
         then:
-        replacedRes == file('src/alt-channel/res/drawable-hdpi/ic_notification_android_labs_logo.png').bytes
+        replacedRes == file('src/alt-channel/res/drawable-hdpi-v4/ic_notification_android_labs_logo.png').bytes
 
         when:
         final aaptResult = ['aapt', 'd', 'strings', outputApk].execute().text
